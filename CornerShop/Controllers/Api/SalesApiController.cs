@@ -440,20 +440,6 @@ public class SalesApiController : ControllerBase
     }
 }
 
-// Request model for creating sales
-public class CreateSaleRequest
-{
-    public string StoreId { get; set; } = string.Empty;
-    public List<CreateSaleItemRequest> Items { get; set; } = new();
-}
-
-public class CreateSaleItemRequest
-{
-    public string ProductName { get; set; } = string.Empty;
-    public int Quantity { get; set; }
-    public decimal UnitPrice { get; set; }
-}
-
 public class SalePatchRequest
 {
     public string? Status { get; set; }

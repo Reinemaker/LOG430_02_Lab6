@@ -7,7 +7,7 @@ namespace CornerShop.Services;
 public interface IStoreService
 {
     Task<List<Store>> GetAllStores();
-    Task<Store?> GetStoreById(string storeId);
+    Task<Store?> GetStoreById(string storeId, string? sagaId = null);
     Task<string> CreateStore(Store store);
     Task<bool> UpdateStore(Store store);
     Task<bool> DeleteStore(string storeId);
@@ -21,12 +21,16 @@ public class StoreService : IStoreService
     private readonly IMongoCollection<Store> _stores;
     private readonly IMongoCollection<Product> _products;
     private readonly IMongoCollection<Sale> _sales;
+    private readonly ISagaEventPublisher _eventPublisher;
+    private readonly ILogger<StoreService> _logger;
 
-    public StoreService(IMongoDatabase database)
+    public StoreService(IMongoDatabase database, ISagaEventPublisher eventPublisher, ILogger<StoreService> logger)
     {
         _stores = database.GetCollection<Store>("stores");
         _products = database.GetCollection<Product>("products");
         _sales = database.GetCollection<Sale>("sales");
+        _eventPublisher = eventPublisher;
+        _logger = logger;
     }
 
     public async Task<List<Store>> GetAllStores()
@@ -34,10 +38,33 @@ public class StoreService : IStoreService
         return await _stores.Find(_ => true).ToListAsync();
     }
 
-    public async Task<Store?> GetStoreById(string storeId)
+    public async Task<Store?> GetStoreById(string storeId, string? sagaId = null)
     {
-        var filter = Builders<Store>.Filter.Eq(s => s.Id, storeId);
-        return await _stores.Find(filter).FirstOrDefaultAsync();
+        try
+        {
+            var filter = Builders<Store>.Filter.Eq(s => s.Id, storeId);
+            var store = await _stores.Find(filter).FirstOrDefaultAsync();
+
+            if (!string.IsNullOrEmpty(sagaId))
+            {
+                var eventType = store != null ? SagaEventType.Success : SagaEventType.Failure;
+                var message = store != null
+                    ? $"Store {storeId} found: {store.Name}"
+                    : $"Store {storeId} not found";
+
+                await _eventPublisher.PublishSagaEventAsync(sagaId, "StoreService", "GetStoreById", eventType, message, new { StoreId = storeId, StoreName = store?.Name, Found = store != null });
+            }
+
+            return store;
+        }
+        catch (Exception ex)
+        {
+            if (!string.IsNullOrEmpty(sagaId))
+            {
+                await _eventPublisher.PublishSagaEventAsync(sagaId, "StoreService", "GetStoreById", SagaEventType.Failure, ex.Message, new { StoreId = storeId, Error = ex.Message });
+            }
+            throw;
+        }
     }
 
     public async Task<string> CreateStore(Store store)

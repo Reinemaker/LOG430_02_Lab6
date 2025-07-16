@@ -82,6 +82,20 @@ builder.Services.AddScoped<CornerShop.Services.SyncService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 
+// Register Saga Orchestrator
+builder.Services.AddScoped<ISagaOrchestrator, SagaOrchestrator>();
+
+// Register Saga Event Publisher and State Manager
+builder.Services.AddSingleton<ISagaEventPublisher, SagaEventPublisher>();
+builder.Services.AddScoped<ISagaStateManager, SagaStateManager>();
+
+// Register Controlled Failure Service
+builder.Services.AddSingleton<IControlledFailureService, ControlledFailureService>();
+
+// Register Saga Metrics and Business Event Logging Services
+builder.Services.AddSingleton<ISagaMetricsService, SagaMetricsService>();
+builder.Services.AddSingleton<IBusinessEventLogger, BusinessEventLogger>();
+
 // Add health checks
 builder.Services.AddHealthChecks()
     .AddMongoDb(mongoConnectionString, name: "mongodb")

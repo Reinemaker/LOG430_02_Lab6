@@ -60,11 +60,25 @@ This script will:
 - **Persistent Storage**: MongoDB and Redis data persistence
 - **Environment Isolation**: Production-ready environment configuration
 
+### Saga Orchestration
+- **Distributed Transaction Management**: Coordinated transactions across microservices
+- **Automatic Compensation**: Rollback mechanisms for failed transactions
+- **Fault Tolerance**: Graceful handling of partial failures
+- **Observability**: Detailed logging and monitoring of transaction flows
+- **Event Publishing**: Microservices publish success/failure events after processing
+- **State Machine**: Explicit state machine with enum, logging, and persistence
+- **State Tracking**: Real-time state updates and transition history
+- **Controlled Failures**: Configurable failure simulation for testing and observation
+- **Enhanced Compensation**: Detailed compensation tracking and results
+
 ### Monitoring & Observability
 - **Prometheus**: Metrics collection and storage
-- **Grafana**: Real-time monitoring dashboards
+- **Grafana**: Real-time monitoring dashboards with saga state evolution visualization
 - **Health Endpoints**: `/health` and `/health/ready` endpoints
 - **Application Metrics**: Built-in Prometheus metrics
+- **Saga Metrics**: Comprehensive saga orchestration metrics (duration, failures, steps, state transitions)
+- **Structured Logging**: Business events and decisions with JSON format
+- **Real-time Monitoring**: Live saga state tracking and performance analysis
 
 ### Database & Caching
 - **MongoDB Authentication**: Secure database access with credentials
@@ -144,6 +158,26 @@ docker-compose up -d --build
 docker ps
 ```
 
+### Test Saga Orchestration
+```bash
+./test-saga-orchestration.sh
+```
+
+### Test Saga State Machine
+```bash
+./test-saga-state-machine.sh
+```
+
+### Test Controlled Failures
+```bash
+./test-controlled-failures.sh
+```
+
+### Test Saga Metrics & Monitoring
+```bash
+./test-saga-metrics-monitoring.sh
+```
+
 ## 🔍 Troubleshooting
 
 ### Application Not Accessible
@@ -169,6 +203,7 @@ docker ps
 - **Content Negotiation**: Support for JSON and XML formats via Accept header
 - **PATCH Support**: Partial updates for all resources
 - **OpenAPI 3.0 Documentation**: Complete Swagger/OpenAPI documentation
+- **Saga Orchestration**: Distributed transaction management with compensation support
 
 ## API Endpoints
 ### Products API (`/api/v1/products`)
@@ -206,6 +241,39 @@ docker ps
 - `GET /api/v1/reports/products/top-selling` - Get top selling products
 - `GET /api/v1/reports/sales/trend` - Get sales trend report
 
+### Saga Orchestration API (`/api/v1/saga`)
+- `POST /api/v1/saga/sale` - Execute sale saga with distributed transaction management
+- `POST /api/v1/saga/order` - Execute order saga with distributed transaction management
+- `POST /api/v1/saga/stock` - Execute stock update saga with distributed transaction management
+- `POST /api/v1/saga/compensate/{sagaId}` - Compensate a failed saga by rolling back completed steps
+
+### Saga State Management API (`/api/v1/saga-state`)
+- `GET /api/v1/saga-state` - Get all sagas with their current states
+- `GET /api/v1/saga-state/{sagaId}` - Get a specific saga by ID
+- `GET /api/v1/saga-state/{sagaId}/transitions` - Get saga transitions (state history)
+- `GET /api/v1/saga-state/by-state/{state}` - Get sagas by state
+- `GET /api/v1/saga-state/events` - Get all saga events
+- `GET /api/v1/saga-state/{sagaId}/events` - Get events for a specific saga
+
+### Controlled Failure Management API (`/api/ControlledFailure`)
+- `GET /api/ControlledFailure/config` - Get current failure configuration
+- `PUT /api/ControlledFailure/config` - Update failure configuration
+- `POST /api/ControlledFailure/toggle` - Enable or disable controlled failures
+- `POST /api/ControlledFailure/probability` - Set failure probability for specific failure type
+- `GET /api/ControlledFailure/affected-sagas` - Get sagas affected by failures
+- `GET /api/ControlledFailure/compensation-stats` - Get compensation statistics
+- `POST /api/ControlledFailure/simulate` - Simulate a specific failure type
+
+### Saga Metrics & Monitoring API (`/api/SagaMetrics`)
+- `GET /api/SagaMetrics/summary` - Get metrics summary
+- `GET /api/SagaMetrics/prometheus` - Get Prometheus metrics in text format
+- `GET /api/SagaMetrics/performance` - Get saga performance statistics
+- `GET /api/SagaMetrics/state-distribution` - Get saga state distribution
+- `GET /api/SagaMetrics/transition-analysis` - Get saga transition analysis
+- `GET /api/SagaMetrics/duration-stats` - Get saga duration statistics
+- `GET /api/SagaMetrics/recent-activity` - Get recent saga activity
+- `GET /api/SagaMetrics/grafana` - Get Grafana integration information
+
 ## CORS Testing
 - **CORS Test Page**: `http://cornershop.localhost/cors-test.html` - Test cross-origin requests
 
@@ -217,6 +285,7 @@ docker ps
 - [CORS Configuration](docs/CORS_README.md)
 - [Load Testing Guide](load-tests/README.md)
 - [Monitoring Setup](grafana/README.md)
+- [Saga Orchestration](docs/SAGA_ORCHESTRATION.md)
 
 ## 🔄 Development Workflow
 
